@@ -1,0 +1,7 @@
+# INTECK AI Video Analytics - runtime dependencies (Windows 10/11, Python 3.11/3.12 64-bit)
+ultralytics>=8.3.0        # YOLO11 detection + ByteTrack tracking
+opencv-python>=4.9.0      # RTSP capture, drawing, MJPEG encoding, clip writing
+numpy>=1.26,<3            # array maths
+Flask>=3.0                # local dashboard
+lap>=0.5.12               # linear assignment used by ByteTrack
+requests>=2.31            # used by ultralytics for weight downloads

@@ -1,0 +1,3 @@
+# Extra packages needed only to compile the Windows executable
+-r requirements.txt
+pyinstaller>=6.6

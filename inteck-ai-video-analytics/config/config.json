@@ -1,0 +1,426 @@
+{
+  "site": {
+    "name": "INTECK Plant 1",
+    "timezone": "Asia/Kolkata"
+  },
+  "engine": {
+    "model": "models/yolo11n.pt",
+    "tracker": "bytetrack.yaml",
+    "device": "cpu",
+    "imgsz": 640,
+    "conf": 0.35,
+    "iou": 0.5,
+    "target_fps": 8,
+    "half": false
+  },
+  "storage": {
+    "database": "logs/events.db",
+    "snapshots_dir": "snapshots",
+    "recordings_dir": "recordings",
+    "log_file": "logs/inteck.log",
+    "retention_days": 30,
+    "clips": {
+      "enabled": true,
+      "pre_seconds": 4,
+      "post_seconds": 6,
+      "fps": 8
+    },
+    "snapshot_on_event": true
+  },
+  "dashboard": {
+    "host": "127.0.0.1",
+    "port": 8080,
+    "open_browser": true,
+    "stream_quality": 70,
+    "stream_width": 960
+  },
+  "alerts": {
+    "console": true,
+    "webhook": {
+      "enabled": false,
+      "url": "",
+      "timeout_seconds": 5
+    },
+    "whatsapp": {
+      "enabled": false,
+      "provider": "meta_cloud_api",
+      "phone_number_id": "",
+      "access_token": "",
+      "recipients": [],
+      "template": "inteck_alert"
+    },
+    "min_severity": "info"
+  },
+  "cameras": [
+    {
+      "id": "cam_canteen",
+      "name": "Canteen Entrance",
+      "source": "rtsp://username:password@192.168.1.101:554/Streaming/Channels/101",
+      "enabled": true,
+      "rotate": 0,
+      "zones": {
+        "canteen_area": [
+          [
+            240,
+            120
+          ],
+          [
+            900,
+            120
+          ],
+          [
+            900,
+            640
+          ],
+          [
+            240,
+            640
+          ]
+        ]
+      },
+      "lines": {},
+      "analytics": [
+        {
+          "type": "canteen_timing",
+          "enabled": true,
+          "zone": "canteen_area",
+          "permitted_windows": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "start": "12:30",
+              "end": "13:30"
+            },
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "start": "16:00",
+              "end": "16:20"
+            }
+          ],
+          "dwell_seconds": 5,
+          "cooldown_seconds": 120,
+          "severity": "warning"
+        }
+      ],
+      "reference_size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "id": "cam_restricted",
+      "name": "Restricted Store Room",
+      "source": "rtsp://username:password@192.168.1.102:554/Streaming/Channels/101",
+      "enabled": true,
+      "rotate": 0,
+      "zones": {
+        "restricted": [
+          [
+            100,
+            80
+          ],
+          [
+            1180,
+            80
+          ],
+          [
+            1180,
+            700
+          ],
+          [
+            100,
+            700
+          ]
+        ]
+      },
+      "lines": {},
+      "analytics": [
+        {
+          "type": "restricted_area",
+          "enabled": true,
+          "zone": "restricted",
+          "authorized_windows": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "start": "09:00",
+              "end": "18:00"
+            }
+          ],
+          "dwell_seconds": 3,
+          "cooldown_seconds": 60,
+          "severity": "critical"
+        },
+        {
+          "type": "ppe_violation",
+          "enabled": true,
+          "zone": "restricted",
+          "required_ppe": [
+            "helmet",
+            "vest"
+          ],
+          "model": "models/ppe.pt",
+          "conf": 0.45,
+          "dwell_seconds": 4,
+          "cooldown_seconds": 180,
+          "severity": "warning"
+        }
+      ],
+      "reference_size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "id": "cam_gate",
+      "name": "Main Gate",
+      "source": "rtsp://username:password@192.168.1.103:554/Streaming/Channels/101",
+      "enabled": true,
+      "rotate": 0,
+      "zones": {
+        "security_post": [
+          [
+            60,
+            320
+          ],
+          [
+            420,
+            320
+          ],
+          [
+            420,
+            700
+          ],
+          [
+            60,
+            700
+          ]
+        ]
+      },
+      "lines": {
+        "people_line": [
+          [
+            500,
+            620
+          ],
+          [
+            1220,
+            620
+          ]
+        ],
+        "vehicle_line": [
+          [
+            500,
+            700
+          ],
+          [
+            1260,
+            700
+          ]
+        ]
+      },
+      "analytics": [
+        {
+          "type": "security_post",
+          "enabled": true,
+          "zone": "security_post",
+          "duty_windows": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "start": "00:00",
+              "end": "23:59"
+            }
+          ],
+          "absence_seconds": 120,
+          "cooldown_seconds": 300,
+          "severity": "critical"
+        },
+        {
+          "type": "people_counting",
+          "enabled": true,
+          "line": "people_line",
+          "in_direction": "down",
+          "reset": "daily",
+          "severity": "info"
+        },
+        {
+          "type": "vehicle_counting",
+          "enabled": true,
+          "line": "vehicle_line",
+          "in_direction": "down",
+          "classes": [
+            "car",
+            "motorcycle",
+            "bus",
+            "truck",
+            "bicycle"
+          ],
+          "reset": "daily",
+          "severity": "info"
+        }
+      ],
+      "reference_size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "id": "cam_shopfloor",
+      "name": "Shop Floor",
+      "source": "rtsp://username:password@192.168.1.104:554/Streaming/Channels/101",
+      "enabled": true,
+      "rotate": 0,
+      "zones": {
+        "machine_cnc_01": [
+          [
+            380,
+            260
+          ],
+          [
+            880,
+            260
+          ],
+          [
+            880,
+            640
+          ],
+          [
+            380,
+            640
+          ]
+        ],
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            1280,
+            0
+          ],
+          [
+            1280,
+            720
+          ],
+          [
+            0,
+            720
+          ]
+        ]
+      },
+      "lines": {},
+      "analytics": [
+        {
+          "type": "crowd_gathering",
+          "enabled": true,
+          "zone": "floor",
+          "max_people": 2,
+          "cluster_radius_px": 220,
+          "dwell_seconds": 20,
+          "cooldown_seconds": 180,
+          "severity": "warning"
+        },
+        {
+          "type": "mobile_phone",
+          "enabled": true,
+          "zone": "floor",
+          "conf": 0.4,
+          "dwell_seconds": 3,
+          "cooldown_seconds": 120,
+          "severity": "warning"
+        },
+        {
+          "type": "machine_idle",
+          "enabled": true,
+          "zone": "machine_cnc_01",
+          "machine_name": "CNC-01",
+          "motion_threshold": 3.0,
+          "idle_seconds": 300,
+          "require_operator_absent": false,
+          "shift_windows": [
+            {
+              "days": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "start": "08:00",
+              "end": "20:00"
+            }
+          ],
+          "cooldown_seconds": 600,
+          "severity": "warning"
+        }
+      ],
+      "reference_size": [
+        1280,
+        720
+      ]
+    },
+    {
+      "id": "cam_door",
+      "name": "Server Room Door",
+      "source": "rtsp://username:password@192.168.1.105:554/Streaming/Channels/101",
+      "enabled": true,
+      "rotate": 0,
+      "zones": {},
+      "lines": {
+        "door_line": [
+          [
+            420,
+            520
+          ],
+          [
+            980,
+            520
+          ]
+        ]
+      },
+      "analytics": [
+        {
+          "type": "door_tailgating",
+          "enabled": true,
+          "line": "door_line",
+          "in_direction": "down",
+          "max_people": 2,
+          "window_seconds": 12,
+          "cooldown_seconds": 60,
+          "severity": "critical"
+        }
+      ],
+      "reference_size": [
+        1280,
+        720
+      ]
+    }
+  ]
+}

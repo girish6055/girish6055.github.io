@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>INTECK AI Video Analytics — {{ site }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="mark">INTECK</span>
+    <span class="product">AI Video Analytics</span>
+  </div>
+  <div class="site">{{ site }}</div>
+  <div class="status-pills">
+    <span class="pill" id="pill-cameras">cameras –</span>
+    <span class="pill warn" id="pill-warning">warnings –</span>
+    <span class="pill crit" id="pill-critical">critical –</span>
+    <span class="pill" id="pill-uptime">uptime –</span>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-view="live">Live cameras</button>
+  <button class="tab" data-view="events">Events</button>
+  <button class="tab" data-view="counts">Counting</button>
+  <button class="tab" data-view="health">System health</button>
+</nav>
+
+<main>
+  <section id="view-live" class="view active">
+    <div class="camera-grid">
+      {% for camera in cameras %}
+      <article class="camera-card" data-camera="{{ camera.id }}">
+        <div class="camera-head">
+          <h2>{{ camera.name }}</h2>
+          <span class="cam-status" data-role="status">connecting</span>
+        </div>
+        <div class="frame"><img src="{{ url_for('stream', camera_id=camera.id) }}" alt="{{ camera.name }} live view"></div>
+        <ul class="analytic-list" data-role="analytics">
+          {% for title in camera.analytics %}<li>{{ title }}</li>{% endfor %}
+        </ul>
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section id="view-events" class="view">
+    <div class="filters">
+      <select id="filter-severity">
+        <option value="">All severities</option>
+        <option value="critical">Critical</option>
+        <option value="warning">Warning</option>
+        <option value="info">Info</option>
+      </select>
+      <select id="filter-camera"><option value="">All cameras</option></select>
+      <select id="filter-analytic"><option value="">All analytics</option></select>
+      <button id="refresh-events">Refresh</button>
+    </div>
+    <table class="events">
+      <thead>
+        <tr><th>Time</th><th>Severity</th><th>Camera</th><th>Analytic</th><th>Detail</th><th>Evidence</th><th></th></tr>
+      </thead>
+      <tbody id="events-body"><tr><td colspan="7" class="empty">No events yet.</td></tr></tbody>
+    </table>
+  </section>
+
+  <section id="view-counts" class="view">
+    <div class="cards" id="count-cards"></div>
+    <table class="events">
+      <thead><tr><th>Camera</th><th>Analytic</th><th>Counter</th><th>Value</th><th>Updated</th></tr></thead>
+      <tbody id="counters-body"><tr><td colspan="5" class="empty">No counters yet.</td></tr></tbody>
+    </table>
+  </section>
+
+  <section id="view-health" class="view">
+    <div class="cards" id="health-cards"></div>
+    <table class="events">
+      <thead><tr><th>Camera</th><th>Status</th><th>FPS</th><th>Resolution</th><th>Inference</th><th>Analytic states</th></tr></thead>
+      <tbody id="health-body"><tr><td colspan="6" class="empty">Waiting for status…</td></tr></tbody>
+    </table>
+  </section>
+</main>
+
+<footer>INTECK AI Video Analytics · YOLO11 + ByteTrack · events stored locally in <code>logs/events.db</code></footer>
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
+</html>
